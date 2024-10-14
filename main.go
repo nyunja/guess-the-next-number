@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var y []float64
+var y []float64 = make([]float64, 0, 50)
 var count int
 
 func main() {
@@ -37,12 +37,12 @@ func estimateRange(n float64) {
 		y = y[1:]
 	}
 	y = append(y, n)
-	if count < 50 {
+	if count < 5 {
 		lower = n - 90
 		upper = n + 90
 		count++
 	} else {
-		x := make([]float64, 0, len(y))
+		x := make([]float64, len(y))
 		for i := range y {
 			x[i] = float64(i)
 		}
@@ -50,18 +50,18 @@ func estimateRange(n float64) {
 		// Predict range
 		predictedValue := (slope * float64(len(x))) + intercept
 		lower = math.Max(predictedValue-99, n-99)
-		upper = math.Min(predictedValue-100, n-100)
+		upper = math.Min(predictedValue+100, n+100)
 		//Ensure minimum range
 		minRange := math.Max(2, math.Abs(n)*0.02)
 		if (upper-lower) < minRange {
 			mid := (lower + upper) / 2
-			lower = mid + 99
-			upper = mid + 100
+			lower = mid - minRange/2
+			upper = mid + minRange/2
 		}
-		// Check if the range is above maximum
-		if upper - lower > 200 {
+		// Ensure maximum range
+		if (upper - lower) > 200 {
 			mid := (upper + lower) / 2
-			lower = mid + 100
+			lower = mid - 100
 			upper = mid + 100
 		}
 		// fmt.Println(predictedValue)
