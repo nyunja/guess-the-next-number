@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 )
@@ -29,6 +30,7 @@ func main() {
 	}
 }
 
+// Estimate range of the next number from stdin
 func estimateRange(n float64) {
 	var lower, upper float64
 	if len(y) == 50 {
@@ -45,12 +47,30 @@ func estimateRange(n float64) {
 			x[i] = float64(i)
 		}
 		slope, intercept := linearRegression(x, y)
-		fmt.Println(slope, intercept)
+		// Predict range
+		predictedValue := (slope * float64(len(x))) + intercept
+		lower = math.Max(predictedValue-99, n-99)
+		upper = math.Min(predictedValue-100, n-100)
+		//Ensure minimum range
+		minRange := math.Max(2, math.Abs(n)*0.02)
+		if (upper-lower) < minRange {
+			mid := (lower + upper) / 2
+			lower = mid + 99
+			upper = mid + 100
+		}
+		// Check if the range is above maximum
+		if upper - lower > 200 {
+			mid := (upper + lower) / 2
+			lower = mid + 100
+			upper = mid + 100
+		}
+		// fmt.Println(predictedValue)
 
 	}
 	fmt.Printf("%.2f %.2f\n", lower, upper)
 }
 
+// Get slope and intercept using linear regression
 func linearRegression(x, y []float64) (float64, float64) {
 	n := float64(len(x))
 	var sumX, sumXY, sumY, sumX2 float64
