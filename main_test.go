@@ -23,3 +23,30 @@ func TestEstimatedRange(t *testing.T) {
 		t.Errorf("Wrong estimated range, got %s expected %s\n", output, expectedOutput)
 	}
 }
+
+func TestLinearRegression(t *testing.T) {
+	tests := []struct{
+		name string
+		x []float64
+		y []float64
+		wantM float64
+		wantC float64
+	}{
+		{
+			name: "test 1",
+			x: []float64{0, 1, 2, 3, 4, 5},
+			y: []float64{12.0, 12.0, 14.0, 56.0, 34.0, 10.0},
+			wantM: 2.8,
+			wantC: 16,
+		},
+	}
+	for _, tt := range tests {
+		gotM,gotC := linearRegression(tt.x, tt.y)
+		if gotM != tt.wantM {
+			t.Errorf("calculateLinearRegression() gotM = %v, want %v", gotM, tt.wantM)
+		}
+		if gotC != tt.wantC {
+			t.Errorf("calculateLinearRegression() gotC = %v, want %v", gotC, tt.wantC)
+		}
+	}
+}
