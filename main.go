@@ -64,7 +64,6 @@ func estimateRange(n float64) {
 			lower = mid - 100
 			upper = mid + 100
 		}
-		// fmt.Println(predictedValue)
 
 	}
 	fmt.Printf("%.2f %.2f\n", lower, upper)
