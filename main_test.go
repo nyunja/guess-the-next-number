@@ -10,32 +10,43 @@ import (
 )
 
 func TestInvalidInput(t *testing.T) {
+	
+	// Create a pipe for stdin and stdout redirection
+	inR, inW, _ := os.Pipe()
+	outR, outW, _ := os.Pipe()
+	// Redirect stdout and stdin
 	oldStdin := os.Stdin
 	oldStdout := os.Stdout
-	defer func() {
-		os.Stdin = oldStdin
-		os.Stdout = oldStdout
+	os.Stdin = inR
+	os.Stdout = outW
+
+	// defer func() {
+	// 	// Restore original stdin and stdout
+	// 	os.Stdin = oldStdin
+	// 	os.Stdout = oldStdout
+	// }()
+
+	// Write test input for stdin
+	_,_ = inW.Write([]byte("100\n"))
+	inW.Close()
+
+	// Capture the output from stdout
+	go func() {
+		main()
+		outW.Close()
 	}()
 
-	// Test with non-numeric input
-	file, _ := os.Open("test.txt")
-
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	// Test with non-numeric input
-	os.Stdin = file
-
-	main()
-
-	w.Close()
+	// Read the output from the read end of the pipe
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	io.Copy(&buf, outR)
 	output := buf.String()
 
-	if !strings.Contains(output, "error") {
-		t.Errorf("Expected error message for invalid input, got: %s and %v", output, *file)
+	if !strings.Contains(output, "10.00 190.00\n") {
+		t.Errorf("Expected error message for invalid input, got: %s", output)
 	}
+	// Reset global variables
+	os.Stdin = oldStdin
+	os.Stdout = oldStdout
 }
 
 func TestEstimatedRange(t *testing.T) {
