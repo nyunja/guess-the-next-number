@@ -23,7 +23,8 @@ func main() {
 			fmt.Printf("error %v\n", err)
 			return
 		}
-		estimateRange(num)
+		lower, upper := estimateRange(num)
+		fmt.Printf("%.2f %.2f\n", lower, upper)
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Println("error reading input: ", err)
@@ -31,7 +32,7 @@ func main() {
 }
 
 // Estimate range of the next number from stdin
-func estimateRange(n float64) {
+func estimateRange(n float64) (float64, float64) {
 	var lower, upper float64
 	if len(y) == 50 {
 		y = y[1:]
@@ -66,7 +67,7 @@ func estimateRange(n float64) {
 		}
 
 	}
-	fmt.Printf("%.2f %.2f\n", lower, upper)
+	return lower, upper
 }
 
 // Get slope and intercept using linear regression
