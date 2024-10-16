@@ -24,7 +24,6 @@ func main() {
 			return
 		}
 		estimateRange(num)
-		// fmt.Println(lower, upper)
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Println("error reading input: ", err)
