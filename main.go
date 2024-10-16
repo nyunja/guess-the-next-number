@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"strconv"
@@ -11,24 +12,28 @@ import (
 var y []float64 = make([]float64, 0, 50)
 var count int
 
+// Takes input from stdin and prints the estimated range of the next number to stdout
+func processInput(r io.Reader, w io.Writer) error {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		num, err := strconv.ParseFloat(scanner.Text(), 64)
+		if err != nil {
+			return fmt.Errorf("invalid input %v", err)
+		}
+		lower, upper := estimateRange(num)
+		fmt.Fprintf(w, "%.2f %.2f\n", lower, upper)
+	}
+	return scanner.Err()
+}
 func main() {
 	if len(os.Args) != 1 {
 		fmt.Println("Usage: go run main.go")
 		return
 	}
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		num, err := strconv.ParseFloat(scanner.Text(), 64)
-		if err != nil {
-			fmt.Printf("error %v\n", err)
-			return
-		}
-		lower, upper := estimateRange(num)
-		fmt.Printf("%.2f %.2f\n", lower, upper)
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Println("error reading input: ", err)
-	}
+	if err := processInput(os.Stdin, os.Stdout); err != nil {
+        fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+        os.Exit(1)
+    }
 }
 
 // Estimate range of the next number from stdin
@@ -54,7 +59,7 @@ func estimateRange(n float64) (float64, float64) {
 		upper = math.Min(predictedValue+100, n+100)
 		//Ensure minimum range
 		minRange := math.Max(2, math.Abs(n)*0.02)
-		if (upper-lower) < minRange {
+		if (upper - lower) < minRange {
 			mid := (lower + upper) / 2
 			lower = mid - minRange/2
 			upper = mid + minRange/2
@@ -80,7 +85,7 @@ func linearRegression(x, y []float64) (float64, float64) {
 		sumXY += x[i] * y[i]
 		sumX2 += x[i] * x[i]
 	}
-	slope := (n*sumXY - sumX*sumY) / (n*sumX2 - sumX * sumX)
+	slope := (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX)
 	intercept := (sumY - slope*sumX) / n
 	return slope, intercept
 }
