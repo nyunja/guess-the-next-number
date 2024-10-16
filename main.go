@@ -20,7 +20,8 @@ func main() {
 	for scanner.Scan() {
 		num, err := strconv.ParseFloat(scanner.Text(), 64)
 		if err != nil {
-			fmt.Printf("Unable to convert %s\n", scanner.Text())
+			fmt.Printf("error %v\n", err)
+			return
 		}
 		estimateRange(num)
 		// fmt.Println(lower, upper)
