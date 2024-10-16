@@ -25,17 +25,6 @@ func processInput(r io.Reader, w io.Writer) error {
 	}
 	return scanner.Err()
 }
-func main() {
-	if len(os.Args) != 1 {
-		fmt.Println("Usage: go run main.go")
-		return
-	}
-	if err := processInput(os.Stdin, os.Stdout); err != nil {
-        fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-        os.Exit(1)
-    }
-}
-
 // Estimate range of the next number from stdin
 func estimateRange(n float64) (float64, float64) {
 	var lower, upper float64
@@ -77,6 +66,10 @@ func estimateRange(n float64) (float64, float64) {
 
 // Get slope and intercept using linear regression
 func linearRegression(x, y []float64) (float64, float64) {
+	if len(x) != len(y) {
+        fmt.Println("Error: x and y should have the same length")
+        os.Exit(1)
+    }
 	n := float64(len(x))
 	var sumX, sumXY, sumY, sumX2 float64
 	for i := range x {
@@ -88,4 +81,15 @@ func linearRegression(x, y []float64) (float64, float64) {
 	slope := (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX)
 	intercept := (sumY - slope*sumX) / n
 	return slope, intercept
+}
+
+func main() {
+	if len(os.Args) != 1 {
+		fmt.Println("Usage: go run main.go")
+		return
+	}
+	if err := processInput(os.Stdin, os.Stdout); err != nil {
+        fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+        os.Exit(1)
+    }
 }
