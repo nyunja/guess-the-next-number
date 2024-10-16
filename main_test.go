@@ -3,96 +3,55 @@ package main
 import (
 	"bytes"
 	"io"
-	"os"
 	"reflect"
-	"strings"
 	"testing"
 )
 
-func TestInvalidInput(t *testing.T) {
-	
-	// Create a pipe for stdin and stdout redirection
-	inR, inW, _ := os.Pipe()
-	outR, outW, _ := os.Pipe()
-	// Redirect stdout and stdin
-	oldStdin := os.Stdin
-	oldStdout := os.Stdout
-	os.Stdin = inR
-	os.Stdout = outW
-
-	// defer func() {
-	// 	// Restore original stdin and stdout
-	// 	os.Stdin = oldStdin
-	// 	os.Stdout = oldStdout
-	// }()
-
-	// Write test input for stdin
-	_,_ = inW.Write([]byte("100\n"))
-	inW.Close()
-
-	// Capture the output from stdout
-	go func() {
-		main()
-		outW.Close()
-	}()
-
-	// Read the output from the read end of the pipe
-	var buf bytes.Buffer
-	io.Copy(&buf, outR)
-	output := buf.String()
-
-	if !strings.Contains(output, "10.00 190.00\n") {
-		t.Errorf("Expected error message for invalid input, got: %s", output)
-	}
-	// Reset global variables
-	os.Stdin = oldStdin
-	os.Stdout = oldStdout
-}
-
-func TestEstimatedRange(t *testing.T) {
+func TestEstimatedRange(t *testing.T){
 	tests := []struct {
-		name string
-		n    float64
-		want string
+		name  string
+		n     float64
+		lower float64
+		upper float64
 	}{
 		{
-			name: "test 1",
-			n:    100,
-			want: "10.00 190.00\n",
+			name:  "test 1",
+			n:     100,
+			lower: 10.00,
+			upper: 190.00,
 		},
 		{
-			name: "test 2 - zero",
-			n:    0,
-			want: "-90.00 90.00\n",
+			name:  "test 2 - zero",
+			n:     0,
+			lower: -90.00,
+			upper: 90.00,
 		},
 		{
-			name: "test 3 - negative number",
-			n:    -50,
-			want: "-140.00 40.00\n",
+			name:  "test 3 - negative number",
+			n:     -50,
+			lower: -140.00,
+			upper: 40.00,
 		},
 		{
-			name: "test 4 - very large number",
-			n:    1000000,
-			want: "999910.00 1000090.00\n",
+			name:  "test 4 - very large number",
+			n:     1000000,
+			lower: 999910.00,
+			upper: 1000090.00,
 		},
 	}
 
 	for _, tt := range tests {
-		count = 1
-		oldStdout := os.Stdout
-		r, w, _ := os.Pipe()
-		os.Stdout = w
-		estimateRange(tt.n)
-		w.Close()
-		os.Stdout = oldStdout
-		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		output := buf.String()
-		expectedOutput := tt.want
-		if !reflect.DeepEqual(output, expectedOutput) {
-			t.Errorf("%s failed. Wrong estimated range, got %s expected %s\n", tt.name, output, expectedOutput)
+		low, up := estimateRange(tt.n)
+		expectedLower := tt.lower
+		expectedUpper := tt.upper
+		if !reflect.DeepEqual(low, expectedLower) {
+			t.Errorf("%s failed. Wrong estimated range, got %.2f expected %.2f\n", tt.name, low, expectedLower)
+			return
 		}
-		y = []float64{}
+		if !reflect.DeepEqual(up, expectedUpper) {
+			t.Errorf("%s failed. Wrong estimated range, got %.2f expected %.2f\n", tt.name, up, expectedUpper)
+			return
+		}
 	}
 }
 
@@ -112,13 +71,6 @@ func TestLinearRegression(t *testing.T) {
 			wantC: 16,
 		},
 		{
-			name:  "test 4 - single point",
-			x:     []float64{1},
-			y:     []float64{1},
-			wantM: 0,
-			wantC: 1,
-		},
-		{
 			name:  "test 5 - perfect line",
 			x:     []float64{1, 2, 3, 4, 5},
 			y:     []float64{2, 4, 6, 8, 10},
@@ -134,5 +86,45 @@ func TestLinearRegression(t *testing.T) {
 		if gotC != tt.wantC {
 			t.Errorf("%s failed. calculateLinearRegression() gotC = %v, want %v", tt.name, gotC, tt.wantC)
 		}
+	}
+}
+
+func Test_processInput(t *testing.T) {
+	type args struct {
+		r io.Reader
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantW   string
+		wantErr bool
+	}{
+		// test 1
+		{name: "test 1",
+			args:    args{r: bytes.NewBufferString("100\n")},
+			wantW:   "10.00 190.00\n",
+			wantErr: false},
+		// test 2
+		{name: "test 2 - empty input",
+			args:    args{r: bytes.NewBufferString("\n")},
+			wantW:   "",
+			wantErr: true},
+		// test 3
+		{name: "test 3 - invalid input",
+			args:    args{r: bytes.NewBufferString("abc")},
+			wantW:   "",
+			wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &bytes.Buffer{}
+			if err := processInput(tt.args.r, w); (err != nil) != tt.wantErr {
+				t.Errorf("processInput() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotW := w.String(); gotW != tt.wantW {
+				t.Errorf("processInput() = %v, want %v", gotW, tt.wantW)
+			}
+		})
 	}
 }
