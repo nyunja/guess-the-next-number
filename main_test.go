@@ -5,8 +5,38 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
+
+func TestInvalidInput(t *testing.T) {
+	oldStdin := os.Stdin
+	oldStdout := os.Stdout
+	defer func() {
+		os.Stdin = oldStdin
+		os.Stdout = oldStdout
+	}()
+
+	// Test with non-numeric input
+	file, _ := os.Open("test.txt")
+
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	// Test with non-numeric input
+	os.Stdin = file
+
+	main()
+
+	w.Close()
+	var buf bytes.Buffer
+	io.Copy(&buf, r)
+	output := buf.String()
+
+	if !strings.Contains(output, "error") {
+		t.Errorf("Expected error message for invalid input, got: %s and %v", output, *file)
+	}
+}
 
 func TestEstimatedRange(t *testing.T) {
 	tests := []struct {
@@ -20,23 +50,24 @@ func TestEstimatedRange(t *testing.T) {
 			want: "10.00 190.00\n",
 		},
 		{
-			name: "test 2",
-			n:    150,
-			want: "60.00 240.00\n",
+			name: "test 2 - zero",
+			n:    0,
+			want: "-90.00 90.00\n",
 		},
 		{
-			name: "test 3",
-			n:    200,
-			want: "110.00 290.00\n",
+			name: "test 3 - negative number",
+			n:    -50,
+			want: "-140.00 40.00\n",
 		},
 		{
-			name: "test 4",
-			n:    400,
-			want: "310.00 490.00\n",
+			name: "test 4 - very large number",
+			n:    1000000,
+			want: "999910.00 1000090.00\n",
 		},
 	}
 
 	for _, tt := range tests {
+		count = 1
 		oldStdout := os.Stdout
 		r, w, _ := os.Pipe()
 		os.Stdout = w
@@ -50,6 +81,7 @@ func TestEstimatedRange(t *testing.T) {
 		if !reflect.DeepEqual(output, expectedOutput) {
 			t.Errorf("%s failed. Wrong estimated range, got %s expected %s\n", tt.name, output, expectedOutput)
 		}
+		y = []float64{}
 	}
 }
 
@@ -69,18 +101,18 @@ func TestLinearRegression(t *testing.T) {
 			wantC: 16,
 		},
 		{
-			name:  "test 2",
-			x:     []float64{0, 1},
-			y:     []float64{12.0, 12.0},
+			name:  "test 4 - single point",
+			x:     []float64{1},
+			y:     []float64{1},
 			wantM: 0,
-			wantC: 12,
+			wantC: 1,
 		},
 		{
-			name:  "test 3",
-			x:     []float64{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49},
-			y:     []float64{12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0, 14.0, 56.0, 34.0, 10.0, 12.0, 12.0},
-			wantM: -0.013061224489795919,
-			wantC: 22.88,
+			name:  "test 5 - perfect line",
+			x:     []float64{1, 2, 3, 4, 5},
+			y:     []float64{2, 4, 6, 8, 10},
+			wantM: 2,
+			wantC: 0,
 		},
 	}
 	for _, tt := range tests {
