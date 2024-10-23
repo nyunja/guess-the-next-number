@@ -1,0 +1,2 @@
+cd student
+go run .
