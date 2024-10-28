@@ -55,7 +55,7 @@ func estimateRange(n float64) (float64, float64) {
 	confidence := 1.96
 	lower = predictedValue - confidence*stdDev - rangeAdjustment
 	upper = predictedValue + confidence*stdDev + rangeAdjustment
-	return math.Ceil(lower), math.Floor(upper)
+	return math.Floor(lower), math.Ceil(upper)
 }
 
 // Get slope and intercept using linear regression
