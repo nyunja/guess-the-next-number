@@ -55,52 +55,11 @@ func estimateRange(n float64) (float64, float64) {
 	confidence := 1.96
 	lower = predictedValue - confidence*stdDev - rangeAdjustment
 	upper = predictedValue + confidence*stdDev + rangeAdjustment
-	// if count < 5 {
-	// 	lower = n - 90
-	// 	upper = n + 90
-	// 	count++
-	// } else {
-	// 	x := make([]float64, len(y))
-	// 	for i := range y {
-	// 		x[i] = float64(i)
-	// 	}
-	// 	slope, intercept := linearRegression(x, y)
-	// 	// Predict range
-	// 	predictedValue := (slope * float64(len(x))) + intercept
-
-	// 	variance := calculateVariance(y)
-	// 	stdDev := math.Sqrt(variance)
-
-	// 	// Calculate pearson correlation coefficient
-	// 	r := pearsonsCorrelation(x, y)
-	// 	// range adjustment usign pearson correlation
-	// 	rangeAdjustment := 1 - math.Abs(r)
-	// 	// Adjust predicted value based on range adjustment
-	// 	confidence := 1.96
-	// 	lower = predictedValue - confidence*stdDev - rangeAdjustment
-	// 	upper = predictedValue + confidence*stdDev + rangeAdjustment
-	// 	// predictedValue += rangeAdjustment * predictedValue
-	// 	// lower = math.Max(predictedValue-99, n-99)
-	// 	// upper = math.Min(predictedValue+100, n+100)
-	// 	// // Ensure minimum range
-	// 	// minRange := math.Max(2, math.Abs(n)*0.02)
-	// 	// if (upper - lower) < minRange {
-	// 	// 	mid := (lower + upper) / 2
-	// 	// 	lower = mid - minRange/2
-	// 	// 	upper = mid + minRange/2
-	// 	// }
-	// 	// // Ensure maximum range
-	// 	// if (upper - lower) > 200 {
-	// 	// 	mid := (upper + lower) / 2
-	// 	// 	lower = mid - 100
-	// 	// 	upper = mid + 100
-	// 	// }
-
-	// }
 	return math.Ceil(lower), math.Floor(upper)
 }
 
 // Get slope and intercept using linear regression
+// The slope represents the change in y for a one-unit change in x.
 func linearRegression(x, y []float64) (float64, float64) {
 	if len(x) != len(y) {
 		fmt.Println("Error: x and y should have the same length")
@@ -119,6 +78,8 @@ func linearRegression(x, y []float64) (float64, float64) {
 	return slope, intercept
 }
 
+// Calculate the Pearson correlation coefficient between two slices of numbers.
+// The Pearson correlation coefficient ranges from -1 to 1.
 func pearsonsCorrelation(x, y []float64) float64 {
 	sumDiffXY, sumDiffX2, sumDiffY2 := 0.0, 0.0, 0.0
 	meanX := calculateMean(x)
@@ -133,6 +94,10 @@ func pearsonsCorrelation(x, y []float64) float64 {
 	return sumDiffXY / math.Sqrt(sumDiffX2*sumDiffY2)
 }
 
+// Calculate the variance of a slice of numbers. 
+// Variance is the average squared difference from the mean. 
+// The standard deviation is the square root of the variance.  
+// This function returns the variance
 func calculateVariance(numbers []float64) float64 {
 	mean := calculateMean(numbers)
 	var sumSquaredDiff float64
@@ -142,6 +107,7 @@ func calculateVariance(numbers []float64) float64 {
 	return sumSquaredDiff / float64(len(numbers))
 }
 
+// Calculate the mean of a slice of numbers.
 func calculateMean(numbers []float64) float64 {
 	sum := 0.0
 	for _, num := range numbers {
