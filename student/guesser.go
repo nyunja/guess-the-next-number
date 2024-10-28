@@ -32,7 +32,7 @@ func processInput(r io.Reader, w io.Writer) error {
 // Estimate range of the next number from stdin
 func estimateRange(n float64) (float64, float64) {
 	var lower, upper float64
-	if len(y) == 4 {
+	if len(y) == 3 {
 		y = y[1:]
 	}
 	y = append(y, n)
@@ -52,7 +52,7 @@ func estimateRange(n float64) (float64, float64) {
 	// range adjustment usign pearson correlation
 	rangeAdjustment := 1 - math.Abs(r)
 	// Adjust predicted value based on range adjustment
-	confidence := 1.96
+	confidence := 2.0
 	lower = predictedValue - confidence*stdDev - rangeAdjustment
 	upper = predictedValue + confidence*stdDev + rangeAdjustment
 	return math.Floor(lower), math.Ceil(upper)
