@@ -50,6 +50,7 @@ func TestEstimatedRange(t *testing.T){
 			return
 		}
 	}
+	y = []float64{}
 }
 
 // TestlinearRegression tests the linearRegression function.
@@ -127,6 +128,7 @@ func Test_processInput(t *testing.T) {
 			}
 		})
 	}
+	y = []float64{}
 }
 
 // pearsonsCorrelation calculates the Pearson correlation coefficient between two datasets.
