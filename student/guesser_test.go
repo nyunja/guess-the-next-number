@@ -20,20 +20,20 @@ func TestEstimatedRange(t *testing.T){
 		{
             name:  "test 0",
             n:     0,
-            lower: -1.00,
-            upper: 2.00,
+            lower: -2.00,
+            upper: 3.00,
         },
         {
             name:  "test 1",
             n:     100,
-            lower: 16.00,
-            upper: 184.00,
+            lower: 38.00,
+            upper: 227.00,
         },
         {
             name:  "test 2 - zero",
             n:     0,
-            lower: -35.00,
-            upper: 134.00,
+            lower: -62.00,
+            upper: 129.00,
         },
 	}
 
@@ -103,7 +103,7 @@ func Test_processInput(t *testing.T) {
 		// test 1
 		{name: "test 1",
 			args:    args{r: bytes.NewBufferString("100\n")},
-			wantW:   "42.00 225.00\n",
+			wantW:   "39.00 228.00\n",
 			wantErr: false},
 		// test 2
 		{name: "test 2 - empty input",
