@@ -32,7 +32,7 @@ func processInput(r io.Reader, w io.Writer) error {
 // Estimate range of the next number from stdin
 func estimateRange(n float64) (float64, float64) {
 	var lower, upper float64
-	if len(y) == 3 {
+	if len(y) == 4 {
 		y = y[1:]
 	}
 	y = append(y, n)
